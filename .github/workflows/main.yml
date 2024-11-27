@@ -21,44 +21,15 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Generate .env file
-        run: |
-          echo "TOKEN_SECRET=${{ secrets.TOKEN_SECRET }}" >> .env
-          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
-          echo "MONGO_CONNECTION=${{ secrets.MONGO_CONNECTION }}" >> .env
-          echo "MAIL_API_KEY=${{ secrets.MAIL_API_KEY }}" >> .env
-          echo "EMAIL=${{ secrets.EMAIL }}" >> .env
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-          echo "APP_PASSWORD=${{ secrets.APP_PASSWORD }}" >> .env
-          echo "FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }}" >> .env
-          echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
-          echo "FIREBASE_PRIVATE_KEY_ID=${{ secrets.FIREBASE_PRIVATE_KEY_ID }}" >> .env
-          echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> .env
-          echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
-          echo "FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}" >> .env
-          echo "FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }}" >> .env
-          echo "FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }}" >> .env
-          echo "FIREBASE_AUTH_PROVIDER_CERT_URL=${{ secrets.FIREBASE_AUTH_PROVIDER_CERT_URL }}" >> .env
-          echo "FIREBASE_CLIENT_CERT_URL=${{ secrets.FIREBASE_CLIENT_CERT_URL }}" >> .env
-          echo "FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}" >> .env
-          echo "EMAIL=${{ secrets.EMAIL }}" >> .env
-          echo "APP_PASSWORD=${{ secrets.APP_PASSWORD }}" >> .env
-          echo "STRIPE_LIVE=${{ secrets.STRIPE_LIVE }}" >> .env
-          
-  
-
       - name: rsync deployments
         uses: burnett01/rsync-deployments@6.0.0
         with:
-          switches: -avzr --delete --exclude 'client' --exclude 'client' --exclude 'folders' 
+          switches: -avzr --delete --exclude 'client' --exclude 'folders' --exclude '.env' --exclude 'node_modules' --exclude '.git'
           path: .
-          remote_path: /home/ubuntu/wodproleague-backend
+          remote_path: /home/ubuntu/webServer
           remote_host: ${{ secrets.SERVER_HOST }}
           remote_user: ${{ secrets.SERVER_USERNAME }}
           remote_key: ${{ secrets.SERVER_PRIVATE_KEY }}
-
 
       - name: Deploy to server
         uses: appleboy/ssh-action@master
@@ -66,5 +37,38 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_PRIVATE_KEY }}
-          script: |            
-            pm2 restart server
+          script: |
+            cd /home/ubuntu/webServer
+            # Create .env file on the server
+            rm -f .env
+
+
+            echo "TOKEN_SECRET=${{ secrets.TOKEN_SECRET }}" >> .env
+            echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+            echo "MONGO_CONNECTION=${{ secrets.MONGO_CONNECTION }}" >> .env
+            echo "MAIL_API_KEY=${{ secrets.MAIL_API_KEY }}" >> .env
+            echo "EMAIL=${{ secrets.EMAIL }}" >> .env
+            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+            echo "APP_PASSWORD=${{ secrets.APP_PASSWORD }}" >> .env
+            echo "FIREBASE_TYPE=${{ secrets.FIREBASE_TYPE }}" >> .env
+            echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
+            echo "FIREBASE_PRIVATE_KEY_ID=${{ secrets.FIREBASE_PRIVATE_KEY_ID }}" >> .env
+            echo "FIREBASE_PRIVATE_KEY=${{ secrets.FIREBASE_PRIVATE_KEY }}" >> .env
+            echo "FIREBASE_CLIENT_EMAIL=${{ secrets.FIREBASE_CLIENT_EMAIL }}" >> .env
+            echo "FIREBASE_CLIENT_ID=${{ secrets.FIREBASE_CLIENT_ID }}" >> .env
+            echo "FIREBASE_AUTH_URI=${{ secrets.FIREBASE_AUTH_URI }}" >> .env
+            echo "FIREBASE_TOKEN_URI=${{ secrets.FIREBASE_TOKEN_URI }}" >> .env
+            echo "FIREBASE_AUTH_PROVIDER_CERT_URL=${{ secrets.FIREBASE_AUTH_PROVIDER_CERT_URL }}" >> .env
+            echo "FIREBASE_CLIENT_CERT_URL=${{ secrets.FIREBASE_CLIENT_CERT_URL }}" >> .env
+            echo "FIREBASE_UNIVERSE_DOMAIN=${{ secrets.FIREBASE_UNIVERSE_DOMAIN }}" >> .env
+            echo "EMAIL=${{ secrets.EMAIL }}" >> .env
+            echo "APP_PASSWORD=${{ secrets.APP_PASSWORD }}" >> .env
+            echo "STRIPE_LIVE=${{ secrets.STRIPE_LIVE }}" >> .env
+
+            # Install dependencies
+            npm install
+            # Start or restart the application
+            pm2 reload all || pm2 start npm -- start
+            sudo systemctl restart nginx
