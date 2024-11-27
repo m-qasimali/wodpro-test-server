@@ -71,4 +71,4 @@ jobs:
             npm install
             # Start or restart the application
             pm2 reload all || pm2 start npm -- start
-            sudo systemctl restart nginx
+            # sudo systemctl restart nginx
