@@ -35,10 +35,10 @@ class App {
     this.PORT = process.env.PORT || 8000;
     this.initMiddleware();
 
-    initializeFirestoreListener();
+    // initializeFirestoreListener();
     this.initRoutes();
 
-    initCronJobs();
+    // initCronJobs();
   }
 
   initMiddleware() {

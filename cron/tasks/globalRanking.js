@@ -41,8 +41,12 @@ const handleGlobalRanking = async () => {
           if (userRanking?.teamId) {
             if (!teams[userRanking.teamId]) {
               teams[userRanking.teamId] = {};
+              teams[userRanking.teamId][workoutId] = userRanking?.points;
+            } else {
+              if (userRanking?.points > teams[userRanking.teamId][workoutId]) {
+                teams[userRanking.teamId][workoutId] = userRanking?.points;
+              }
             }
-            teams[userRanking.teamId][workoutId] = userRanking?.points;
           } else {
             if (!users[userId]) {
               users[userId] = {};
@@ -108,7 +112,7 @@ const handleGlobalRanking = async () => {
     updateLastCronJobUpdateTime();
     // await res.status(200).json({
     //   message: "Global ranking updated successfully",
-    //   data: wod1Ranking,
+    //   data: workoutsRanking,
     // });
   } catch (error) {
     console.error("Error retrieving global ranking:", error);
