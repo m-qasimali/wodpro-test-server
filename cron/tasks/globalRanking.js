@@ -42,6 +42,8 @@ const handleGlobalRanking = async () => {
             if (!teams[userRanking.teamId]) {
               teams[userRanking.teamId] = {};
               teams[userRanking.teamId][workoutId] = userRanking?.points;
+            } else if (!teams[userRanking.teamId][workoutId]) {
+              teams[userRanking.teamId][workoutId] = userRanking?.points;
             } else {
               if (userRanking?.points > teams[userRanking.teamId][workoutId]) {
                 teams[userRanking.teamId][workoutId] = userRanking?.points;
