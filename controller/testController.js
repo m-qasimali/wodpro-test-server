@@ -10,10 +10,7 @@ const testController = {
     try {
       const docRef = await db.collection(FirebaseCollectionNames.Videos).add({
         data,
-        videos: [
-          "https://firebasestorage.googleapis.com/v0/b/wod-pro-league.appspot.com/o/Videos%2F1731419066109.mp4?alt=media&token=47f69ec6-6f4a-4f21-bafd-1c054525970c",
-          "https://firebasestorage.googleapis.com/v0/b/wod-pro-league.appspot.com/o/Videos%2F1731419093006.mp4?alt=media&token=031fe8ae-5f8b-48b7-adf3-01c2e792553b",
-        ],
+        videos: ["", ""],
         uploadTime: Timestamp.now(),
       });
 
@@ -116,10 +113,56 @@ const testController = {
 
   async getRanking(req, res) {
     try {
-      const snapshot = await db
-        .collection(FirebaseCollectionNames.Ranking)
+      const usersSnapshot = await db
+        .collection(FirebaseCollectionNames.Users)
         .get();
-      const ranking = snapshot.docs.map((doc) => doc.data());
+      const users = usersSnapshot.docs.map((doc) => doc.data());
+      const workoutID = "eOUDzuvc91Na8UK8ZVXr";
+
+      const workoutSnapshot = await db
+        .collection(FirebaseCollectionNames.Workouts)
+        .doc(workoutID)
+        .get();
+
+      const workout = workoutSnapshot.data();
+
+      const rankingRef = db
+        .collection(FirebaseCollectionNames.Ranking)
+        .doc(workoutID);
+
+      const rankingData = {};
+
+      users.forEach((user) => {
+        const userData = {
+          category: user?.categoryName,
+          country: user?.country,
+          docId: user?.userId,
+          firstName: user?.firstName,
+          geographicArea: user?.city,
+          isActive: true,
+          isParticipated: true,
+          lastName: user.lastName,
+          liftedWeight: "",
+          number: user?.boxNumber,
+          points: 0,
+          profilePicture: user?.profilePicture || "",
+          province: user?.province || "",
+          rank: 0,
+          repetitions: `${generateRandomNumber()}`,
+          teamBanner: user?.teamBanner || "",
+          teamId: user?.teamId || "",
+          teamName: user?.teamName || "",
+          time: new Date().toISOString(),
+          uploadTime: "",
+          wod: workout.wod,
+          wodNumber: workout.wodNumber,
+          year: "2024-2025",
+        };
+
+        rankingData[user.userId] = userData;
+      });
+
+      await rankingRef.set(rankingData, { merge: true });
 
       res.status(200).json({
         status: "success",

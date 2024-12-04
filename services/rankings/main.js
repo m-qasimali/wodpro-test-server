@@ -3,6 +3,7 @@ const { FirebaseCollectionNames } = require("../../utils/constants");
 const bothWorkoutRanking = require("./bothWorkoutRanking");
 const timeWorkoutRanking = require("./timeWorkoutRanking");
 const weightWorkoutRanking = require("./weightWorkoutRanking");
+const repetitionsWorkoutRanking = require("./repetitionsWorkoutRanking");
 
 const calculateRankings = (() => {
   const processingTasks = new Set(); // Track currently processing `data.id`
@@ -38,7 +39,9 @@ const calculateRankings = (() => {
 
       console.log("workoutResultType: ", workoutResultType);
 
-      if (!["time", "weight", "both"].includes(workoutResultType)) {
+      if (
+        !["time", "weight", "both", "repetitions"].includes(workoutResultType)
+      ) {
         console.log("Unknown or missing workout result type.");
         return;
       }
@@ -50,6 +53,8 @@ const calculateRankings = (() => {
         await weightWorkoutRanking(data);
       } else if (workoutResultType === "both") {
         await bothWorkoutRanking(data);
+      } else if (workoutResultType === "repetitions") {
+        await repetitionsWorkoutRanking(data);
       }
     } catch (error) {
       console.error(`Error calculating rankings for id: ${data.id}`, error);

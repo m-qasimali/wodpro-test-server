@@ -38,7 +38,7 @@ class App {
     initializeFirestoreListener();
     this.initRoutes();
 
-    initCronJobs();
+    // initCronJobs();
   }
 
   initMiddleware() {
